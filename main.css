@@ -1,0 +1,32 @@
+* {
+    margin: 0 auto;
+    text-align: center;
+}
+
+header nav {
+    background-color: lightskyblue;
+    padding: 1%;
+    display: flex;
+}
+
+nav button {
+    width: 25rem;
+}
+
+section {
+    display: flex;
+}
+
+button {
+    border: none;
+    border-radius: 5%;
+    transition: 1s;
+    background-color: #0000;
+    padding: 1%;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #e9ac3c;
+    box-shadow: inset 1px 1px 1px;
+}
