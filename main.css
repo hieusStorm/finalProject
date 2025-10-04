@@ -30,3 +30,9 @@ button:hover {
     background-color: #e9ac3c;
     box-shadow: inset 1px 1px 1px;
 }
+
+img {
+    width: 5rem;
+    height: auto;
+    background-color: grey;
+}
