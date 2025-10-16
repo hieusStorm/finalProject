@@ -2,19 +2,29 @@ const url = window.location.href;
 let cardSearch;
 
 if (url.includes('?')) {
-    cardSearch = url.split('?')[1];
-    loadApis(cardSearch);
+    cardSearch = new URLSearchParams(window.location.search);
+    loadApis(cardSearch.get("cardSearch"));
+    document.getElementById("save").addEventListener("click", savePrice);
+
 } else if(url.includes('savedPrices')) {
     loadPrices();
 }
 
 async function loadApis(searchParams) {
+    console.log(searchParams);
     // collect api data
-    const tcgPlayerPrice = await tcgPlayerAPI(searchParams);
-    const cardMarketPrice = await cardMarketAPI(searchParams);
+    const magicTheGathering = await magicTheGatheringAPI(searchParams);
     const scryFall = await scryFallAPI(searchParams);
 
     // fill in html based on the api results
+    const cardName = document.getElementById("cardName");
+    const cardPrice = document.getElementById("price");
+    const cardImage = document.querySelector("img");
+
+    cardName.innerHTML = decodeURIComponent(searchParams);
+    cardPrice.innerHTML = `$${scryFall}`;
+    cardImage.alt = `Image of ${decodeURIComponent(searchParams)}`;
+    cardImage.src = magicTheGathering;
 }
 
 // load in the saved prices
@@ -23,22 +33,22 @@ async function loadPrices() {
     const savedList = document.getElementById('savedList');
     savedList.innerHTML = '';
 
-    const cards = localStorage.getItem('cards').split(',');
+    const cards = JSON.parse(localStorage.getItem('cards'));
 
     cards.forEach(async (card, cardIndex)=> {
         let listItem = document.createElement('li');
         let removeItem = document.createElement('button');
 
         // create list content
-        let TCGPrice = await tcgPlayerAPI(card);
-        let cardMarketPrice = await cardMarketAPI(card);
-        listItem.textContent = `${card}: TCG Player: $${TCGPrice} : CardMarket $${cardMarketPrice}`;
+        let cardPrice = await scryFallAPI(card);
+        listItem.textContent = `${card}:  $${cardPrice}`;
 
+        removeItem.textContent = "X";
         listItem.appendChild(removeItem);
         
         // add button functions
         removeItem.addEventListener('click', ()=> {
-            newCards = localStorage.getItem('cards').split(',');
+            newCards = JSON.parse(localStorage.getItem('cards'));
             newCards.splice(cardIndex, 1);
             localStorage.setItem('cards', JSON.stringify(newCards));
             loadPrices();
@@ -50,29 +60,44 @@ async function loadPrices() {
 }
 
 // Save the price
-async function savePrice() {
-    const TCGPrice = document.getElementById('TCGPrice').split('$')[1];
-    const CardmarketPrice = document.getElementById('CardmarketPrice').split('$')[1];
+function savePrice() {
     const cardName = document.getElementById('cardName').innerHTML;
     // if there is already a saved card price add to the list
-    cards = (localStorage.getItem('cards')) ? localStorage.getItem('cards').split(',').push(cardName) : [cardName];
-
+    cards = (localStorage.getItem('cards')) ? JSON.parse(localStorage.getItem('cards').split(',')): [];
+    if (!cards.includes(cardName)) {
+        cards.push(cardName);   
+    }
     localStorage.setItem('cards', JSON.stringify(cards))
 }
 
-async function tcgPlayerAPI(query) {
-    let price;
-    return price;
-    
+// Get the image of the card and return the image url
+async function magicTheGatheringAPI(query) {
+    try {
+        let urlSafeQuery = encodeURIComponent(query);
+        const response = await fetch(`https://corsproxy.io/?https://api.magicthegathering.io/v1/cards?name=${urlSafeQuery}`);
+        const data = await response.json();
+        const card = (data.cards[0]) ? data.cards[0] : {"imageUrl" : "can not find card"};
+        const imageURL = card.imageUrl;
+        return imageURL;
+        
+    } catch (error) {
+        console.error(error);
+        return error;
+    }
 }
 
-async function cardMarketAPI(query) {
-    let price;
-    return price;
-    
-}
-
+// get the card price and return it
 async function scryFallAPI(query) {
-    let image;
-    return image;
+    try {
+        let urlSafeQuery = encodeURIComponent(query);
+        const response = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${urlSafeQuery}`);
+        const data = await response.json();
+        const price = data.prices.usd || "N/A";
+
+        return price;
+    } catch (error) {
+        console.error(error);
+
+        return "There was an error getting the card";
+    }
 }

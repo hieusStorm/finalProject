@@ -12,12 +12,12 @@
         <h1>Price Comparer TCG Player - Cardmarket</h1>
         <nav>
             <a href="index.html"><button>Price Search</button></a>
-            <a href=""><button>Saved Prices</button></a>
+            <a href="savedPrices.html"><button>Saved Prices</button></a>
         </nav>
     </header>
     <main>
         <search>
-            <form>
+            <form method="get">
                 <input name="cardSearch" placeholder="Fireball">
                 <button type="submit">🔍</button>
             </form>
@@ -26,8 +26,7 @@
             <img alt="card Image goes here">
             <div>
                 <h2 id="cardName"></h2>
-                <p id="TCGPrice">TCG Price: $</p>
-                <p id="CardmarketPrice">Cardmarket Price: $</p>
+                <p id="price">Price: $</p>
             </div>
             <button id="save">Save Price</button>
         </section>
